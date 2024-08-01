@@ -1,73 +1,76 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Nesjs Life-cycle
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Middleware
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Middleware được gọi đầu tiên khi request đến server, chúng ta thường dùng để xử lý và thay đổi thông tin request trước khi truyền đến route handler.
 
-## Description
+1. Global Bound Middleware 🌐🚧
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+    Middleware được đăng ký global trên toàn ứng dụng của chúng ta và sẽ được áp dụng cho tất cả các request được gửi đến.
 
-## Installation
+2. Module Bound Middleware 📦️🚧
 
-```bash
-$ yarn install
-```
+    Middleware của phần này được sử dụng trong một module bất kỳ để thực hiện các chức năng riêng.
 
-## Running the app
+Trong thực tế thì thường chúng ta sẽ cho thử nghiệm trên một tập user cụ thể trước để thu thập ý kiến của họ.
 
-```bash
-# development
-$ yarn run start
+## Guard
 
-# watch mode
-$ yarn run start:dev
+Mục đích duy nhất của Guard là xác định xem có cho phép request được xử lý bởi route handler hay không tại run-time.
 
-# production mode
-$ yarn run start:prod
-```
+**Guard** và **Middleware** đều xử lý logic tương tự nhau, tuy nhiên về bản chất thì **Middleware** sau khi gọi hàm `next()` thì sẽ không biết handler nào sẽ được gọi sau đó. Ngược lại, **Guard** nhờ vào việc có thể truy cập vào **ExcecutionContext instance** nên có thể biết được handler nào tiếp theo sẽ được gọi sau khi gọi hàm `next()`.
 
-## Test
+>Theo mình chúng ta nên dùng Middleware khi cần xử lý và thay đổi các thông tin yêu cầu, còn Guards thì sử dụng để bảo vệ tài nguyên của ứng dụng bằng cách kiểm tra các điều kiện nhất định.
 
-```bash
-# unit tests
-$ yarn run test
+1. Global guards 🌐💂
+    Global guards là package @nestjs/throttler dùng để giới hạn request gọi đến một API nhất định, nếu truy cập vượt quá giới hạn sẽ trả về lỗi Too many requests.
+2. Controller Guards 🔀💂
+    Controller Guards thường được dùng với Jwt Authentication, nên chúng ta cũng sẽ lấy ví dụ dùng jwt để protect flash-cards route, chỉ những user login xong mới có thể truy cập vào.
+3. Route guards 🔜💂
+    Sau khi đi qua Global guards và Controller guards sẽ đến Route guards, ở đây chúng ta thường dùng các guard có tính chất riêng.
 
-# e2e tests
-$ yarn run test:e2e
+## Interceptors 🔁
 
-# test coverage
-$ yarn run test:cov
-```
+Interceptors thì nó cho phép chúng ta xử lý các request và response trước khi chúng được xử lý bởi controller hoặc được trả về cho client.
 
-## Support
+* **Logging**: Ghi lại thông tin request và response để giám sát và phân tích
+* **Caching**: Lưu cache của các response để giảm thiểu việc truy vấn database hoặc service bên ngoài
+* **Transformation**: Chuyển đổi request hoặc response để phù hợp với định dạng mong muốn
+* **Error handling**: Xử lý lỗi và trả về response phù hợp
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Vì **Interceptors** xử lý cả request lẫn response nên sẽ có 2 phần:
 
-## Stay in touch
+* **Pre**: trước khi đến method handler của controller
+* **Post**: sau khi có response trả về từ method handler
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+1. Global Interceptors 🌐🔁
 
-## License
+2. Controller Interceptors 🔀🔁
 
-Nest is [MIT licensed](LICENSE).
+Lưu ý: thứ tự thực thi ở PRE và POST của Interceptors sẽ ngược lại với nhau:
+
+* PRE: Global => Controller => Route
+* POST: Route => Controller => Global
+
+3.Route Interceptors 🔜🔁
+
+Interceptors thường thấy khi dùng với Route Interceptors là ExcludeNull, giúp loại bỏ các trường null khỏi response trước khi trả về cho user.
+
+## Pipes 🕳️
+
+Mục đích chính của Pipe là để kiểm tra, chuyển đổi và/hoặc sàng lọc dữ liệu được gửi và nhận về từ client.
+
+* Xác thực dữ liệu: Kiểm tra xem dữ liệu được gửi từ client có đúng định dạng và có hợp lệ hay không.
+* Chuyển đổi dữ liệu: Chuyển đổi định dạng dữ liệu được gửi từ client thành dạng dữ liệu mà server có thể hiểu được, * hoặc ngược lại chuyển đổi định dạng dữ liệu gửi về cho client.
+* Sàng lọc dữ liệu: Lọc bỏ dữ liệu không cần thiết, nhạy cảm hoặc nguy hiểm.
+
+1. Global Pipes 🌐🕳️
+2. Controller Pipes 🔀🕳️
+3. Route Pipes 🔜🕳️
+4. Route Parameter Pipes
+
+## Exception Filter
+
+Khác với NodeJS thuần, khi gặp exceptions ứng dụng sẽ bị crash,Exception filter được NestJS tạo ra để xử lý các ngoại lệ (exceptions) trong ứng dụng. Nó giúp chúng ta kiểm soát và định hướng các ngoại lệ xảy ra trong ứng dụng và trả về một phản hồi thích hợp cho user.
+
+Tương tự với các thành phần trên, Exception Filter cũng có thể sử dụng ở các cấp độ: Global, Controller và Route. Mình sẽ cho apply HttpExceptionFilter trên toàn ứng dụng.

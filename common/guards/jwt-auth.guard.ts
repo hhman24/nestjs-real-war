@@ -7,13 +7,14 @@ import {
 import { Observable } from 'rxjs';
 
 @Injectable()
-export class OwnershipGuard implements CanActivate {
-  logger = new Logger(OwnershipGuard.name);
+export class JwtAuthorizationGuard implements CanActivate {
+  logger = new Logger(JwtAuthorizationGuard.name);
   canActivate(
     _: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
-    // NOTICE: ROUTE GUARD
-    this.logger.log('===TRIGGER ROUTE GUARD===');
+    // NOTICE: CONTROLLER GUARD
+    this.logger.log('===TRIGGER CONTROLLER GUARD===');
+    // IMPLEMENT JWT GUARD LOGIC HERE
     return true;
   }
 }
