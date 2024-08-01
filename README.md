@@ -74,3 +74,7 @@ Mục đích chính của Pipe là để kiểm tra, chuyển đổi và/hoặc 
 Khác với NodeJS thuần, khi gặp exceptions ứng dụng sẽ bị crash,Exception filter được NestJS tạo ra để xử lý các ngoại lệ (exceptions) trong ứng dụng. Nó giúp chúng ta kiểm soát và định hướng các ngoại lệ xảy ra trong ứng dụng và trả về một phản hồi thích hợp cho user.
 
 Tương tự với các thành phần trên, Exception Filter cũng có thể sử dụng ở các cấp độ: Global, Controller và Route. Mình sẽ cho apply HttpExceptionFilter trên toàn ứng dụng.
+
+## Conclusion
+
+![life-cycle](./life-cycle.png)

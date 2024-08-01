@@ -29,8 +29,8 @@ export class FlashCardsController {
     this.logger = new Logger(FlashCardsController.name);
   }
 
-  @Get()
-  // @UsePipes(ParseRouteValidationPipe)
+  @Get(':id')
+  @UsePipes(ParseRouteValidationPipe)
   @UseInterceptors(ExcludeNullInterceptor)
   @UseGuards(OwnershipGuard)
   sayHello(@Param('id', ParseMongoIdPipe) id: ObjectId): string {
