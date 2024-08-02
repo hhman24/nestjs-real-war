@@ -74,3 +74,20 @@ Network: Tạo một mạng mặc định sử dụng driver `bridge`. `bridge` 
 Lưu ý: các option như `env_file` và `environment` chỉ ghi đè lên các biến môi trường bên trong container chứ không tác động đến các biến trong file `docker-compose`. Mặc định Docker Compose sẽ tự động đọc file .env ở cùng cấp thư mục với file docker-compose đang được chạy, cho nên biến ${PORT} trên option ports sẽ lấy giá trị trong file .env
 
 Bổ sung: trong trường hợp nếu các bạn muốn chọn file env khác cho file docker-compose thay vì mặc định là file .env có thể dùng option --env-file khi run file docker-compose. `docker compose --env-file ./.env.dev -f docker-compose.dev.yml up`
+
+## Husky & Commitlint
+
+Husky và Commitlint là hai công cụ được sử dụng trong quá trình phát triển phần mềm, đặc biệt là trong các dự án sử dụng Git để quản lý phiên bản và phát triển phần mềm theo phương pháp Gitflow.
+
+```bash
+"prepare": "test -d node_modules/husky && husky install || echo \"husky is not installed\"",
+```
+
+>`test -d node_modules/husky`dùng để kiểm tra husky có sẵn hay không trước khi install, tránh trường hợp khi sử dụng CI/CD bị gặp lỗi sh: husky: command not found
+
+Tiếp theo chúng ta sẽ cấu hình cho Commitlint, tạo file commitlint.config.js, chúng ta sẽ cấu hình chỉ cho phép team member tạo các commit message bắt đầu bằng một trong các từ trong enum ở dưới và thêm một số ràng buộc khác.
+
+Để sử dụng mình sẽ cho Husky dùng 2 hooks:
+
+* Pre-commit: dùng để kiểm tra code đã pass hết các rule của eslint chưa. `npx husky add .husky/pre-commit 'npm run lint'`
+* Commit-msg: sẽ dùng commitlint để check commit message căn cứ theo file cấu hình ở trên. `npx husky add .husky/commit-msg 'npx commitlint --edit $1'`
