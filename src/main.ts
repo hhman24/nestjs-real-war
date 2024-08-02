@@ -5,10 +5,18 @@ import { Request, Response } from 'express';
 import { LoggingInterceptor } from 'common/interceptors';
 import helmet from 'helmet';
 import { CustomValidationPipe, HttpExceptionFilter } from 'common';
+import { ConfigService } from '@nestjs/config';
+import { iDatabaseConfig } from 'configs/config/app.config';
 
 async function bootstrap() {
   const logger = new Logger(bootstrap.name);
   const app = await NestFactory.create(AppModule);
+
+  // Config Service
+  const config_service = app.get(ConfigService);
+  logger.debug(`Application running on port ${config_service.get('PORT')}`);
+  logger.debug(`Application running on port ${config_service.get('NODE_ENV')}`);
+
   // NOTICE: GLOBAL ExceptionFilter
   app.useGlobalFilters(new HttpExceptionFilter());
   // NOTICE: GLOBAL PIPE
@@ -21,6 +29,12 @@ async function bootstrap() {
     logger.debug('===TRIGGER GLOBAL MIDDLEWARE===');
     next();
   });
-  await app.listen(3000);
+
+  const database_env = config_service.get<iDatabaseConfig>('mongodb');
+  logger.debug(database_env);
+
+  await app.listen(config_service.get('PORT'), () => {
+    logger.log(`Application running on port ${config_service.get('PORT')}`);
+  });
 }
 bootstrap();
