@@ -4,8 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, PopulateOptions } from 'mongoose';
 import { BaseRepositoryAbstract } from './base/base.abstract.repository';
+import { FindAllResponse } from 'src/types/common.type';
 import { UserRole } from '@modules/user-roles/entities/user-role.entity';
-import { FindAllResponse } from 'src/types/common';
 
 @Injectable()
 export class UsersRepository
@@ -21,14 +21,21 @@ export class UsersRepository
 
   async findAllWithSubFields(
     condition: FilterQuery<UserDocument>,
-    projection?: string,
-    populate?: string[] | PopulateOptions | PopulateOptions[],
+    options: {
+      projection?: string;
+      populate?: string[] | PopulateOptions | PopulateOptions[];
+      offset?: number;
+      limit?: number;
+    },
   ): Promise<FindAllResponse<UserDocument>> {
     const [count, items] = await Promise.all([
-      this.user_model.countDocuments({ ...condition, deleted_at: null }),
+      this.user_model.count({ ...condition, deleted_at: null }),
       this.user_model
-        .find({ ...condition, deleted_at: null }, projection)
-        .populate(populate),
+        .find({ ...condition, deleted_at: null }, options?.projection || '', {
+          skip: options.offset || 0,
+          limit: options.limit || 10,
+        })
+        .populate(options.populate),
     ]);
     return {
       count,

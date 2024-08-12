@@ -5,7 +5,7 @@ import { UsersRepositoryInterface } from './interfaces/users.interface';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRolesService } from '@modules/user-roles/user-roles.service';
 import { USER_ROLE } from '@modules/user-roles/entities/user-role.entity';
-import { FindAllResponse } from 'src/types/common';
+import { FindAllResponse } from 'src/types/common.type';
 
 @Injectable()
 export class UsersService extends BaseServiceAbstract<User> {
@@ -35,13 +35,12 @@ export class UsersService extends BaseServiceAbstract<User> {
 
   async findAll(
     filter?: object,
-    projection?: string,
+    options?: object,
   ): Promise<FindAllResponse<User>> {
-    return await this.users_repository.findAllWithSubFields(
-      filter,
-      projection,
-      'role',
-    );
+    return await this.users_repository.findAllWithSubFields(filter, {
+      ...options,
+      populate: 'role',
+    });
   }
 
   async getUserByEmail(email: string): Promise<User> {

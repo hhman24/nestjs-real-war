@@ -1,6 +1,6 @@
 import { BaseEntity } from '@modules/shared/base/base.entity';
 import { FilterQuery, Model, QueryOptions } from 'mongoose';
-import { FindAllResponse } from 'src/types/common';
+import { FindAllResponse } from 'src/types/common.type';
 import { BaseRepositoryInterface } from './base.interface.repository';
 
 export abstract class BaseRepositoryAbstract<T extends BaseEntity>
@@ -35,12 +35,15 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
 
   async findAll(
     condition: FilterQuery<T>,
-    projection?: string,
     options?: QueryOptions<T>,
   ): Promise<FindAllResponse<T>> {
     const [count, items] = await Promise.all([
-      this.model.countDocuments({ ...condition, deleted_at: null }),
-      this.model.find({ ...condition, deleted_at: null }, projection, options),
+      this.model.count({ ...condition, deleted_at: null }),
+      this.model.find(
+        { ...condition, deleted_at: null },
+        options?.projection,
+        options,
+      ),
     ]);
     return {
       count,
@@ -49,10 +52,11 @@ export abstract class BaseRepositoryAbstract<T extends BaseEntity>
   }
 
   async update(id: string, dto: Partial<T>): Promise<T> {
-    await this.model
-      .updateOne({ _id: id, deleted_at: null }, dto, { new: true })
-      .exec();
-    return await this.model.findById(id).exec();
+    return await this.model.findOneAndUpdate(
+      { _id: id, deleted_at: null },
+      dto,
+      { new: true },
+    );
   }
 
   async softDelete(id: string): Promise<boolean> {
