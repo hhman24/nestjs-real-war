@@ -1,13 +1,18 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { FlashCardsModule } from 'modules';
-import { CustomThrottlerGuard, VersionMiddleware } from 'common';
+import { CustomThrottlerGuard, VersionMiddleware } from 'src/common';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { ConfigModule } from '@nestjs/config';
-import { configurations } from 'configs';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { configurations } from '@configs/index';
+import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi';
+import { UserRolesModule } from '@modules/user-roles/user-roles.module';
+import { UsersModule } from '@modules/users/users.module';
+import { TopicsModule } from '@modules/topics/topics.module';
+import { FlashCardsModule } from '@modules/flash-cards/flash-cards.module';
+import { CollectionsModule } from '@modules/collections/collections.module';
 
 @Module({
   imports: [
@@ -27,6 +32,14 @@ import * as Joi from 'joi';
         abortEarly: false,
       },
     }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('DATABASE_URI'),
+        dbName: configService.get<string>('DATABASE_NAME'),
+      }),
+      inject: [ConfigService],
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60,
@@ -34,6 +47,10 @@ import * as Joi from 'joi';
       },
     ]),
     FlashCardsModule,
+    UserRolesModule,
+    UsersModule,
+    TopicsModule,
+    CollectionsModule,
   ],
   controllers: [AppController],
   providers: [

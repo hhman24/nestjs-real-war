@@ -1,93 +1,66 @@
-# Environment variables
+# Mongoose and generic type
 
-Package dotenv không còn gì xa lạ gì với chúng ta, trong NestJS nó được cải tiến thành package @nestjs/config.
+## MongoDB
 
-* `Tự động load các giá trị cấu hình`: tự động đọc các giá trị từ file .env.
-* `Parse các giá trị chuỗi`: tự động parse các giá trị chuỗi thành các giá trị số, boolean, và json object, giúp cho việc đọc và sử dụng các giá trị cấu hình dễ dàng hơn.
-* `Tùy chọn file cấu hình linh hoạt`: cho phép bạn cấu hình các tùy chọn linh hoạt cho việc đọc và sử dụng các giá trị cấu hình, như là tùy chọn mặc định, đường dẫn tới file cấu hình, một danh sách các file cấu hình khác nhau, v.v.
-* `Đọc cấu hình từ các nguồn khác nhau`: cho phép đọc các giá trị cấu hình từ nhiều nguồn khác nhau, bao gồm các biến môi trường, các file cấu hình, các command line arguments, v.v.
-* `Hỗ trợ cho các module khác trong NestJS`: cho phép sử dụng trong các module khác thông qua dependency injection.
+1. `Lưu trữ dữ liệu dưới dạng document`
+2. `Mở rộng dễ dàng`
+3. `Cung cấp các tính năng đa dạng`: indexing, replication, sharding, aggregation, và full-text search
+4. `Sử dụng tài nguyên ít hơn so với cơ sở dữ liệu quan hệ`
 
-Thêm `NODE_ENV` vào các file env để không phải thêm ở đây thì nên lưu ý: chúng ta chỉ lấy được các giá trị trong file `env` sau khi nó được `dotenv` load thành công, còn chúng ta dùng `envFilePath` là trước khi nó được `load`.
+Nếu đã sử dụng MongoDB thì không thể nào bỏ qua ODM phổ biến của nó là `Mongoose`.
 
-Cache và ExpandVariables
+* **Validation**: cung cấp tính năng validation cho các document trong cơ sở dữ liệu MongoDB, giúp đảm bảo rằng các dữ liệu được lưu trữ đúng định dạng và giá trị.
+* **Schema**: cho phép định nghĩa các schema để định dạng dữ liệu, giúp đảm bảo rằng các tài liệu được lưu trữ theo cùng một định dạng và các trường bắt buộc.
+* **Middleware**: cung cấp middleware để xử lý các sự kiện trong quá trình tương tác với cơ sở dữ liệu, giúp bạn tùy chỉnh hành vi của ứng dụng.
+* **Query Building**: cung cấp một API query builder để tạo các truy vấn dữ liệu phức tạp, giúp đơn giản hóa việc tương tác với cơ sở dữ liệu.
 
-Theo như tài liệu của NestJS thì truy cập trực tiếp vào process.env có thể không được tối ưu, việc sử dụng option cache giúp tăng hiệu năng khi `ConfigService.get` gọi đến các biến trong `process.env`.
+## Database
 
-Option **expandVariables** giúp chúng ta truy cập vào một biến môi trường khác trong file env. Ví dụ như bên dưới nếu không có option **expandVariables** thì kết quả khi gọi **ConfigService#get('DATABASE_URI')** sẽ là `mongodb://${DATABASE_USERNAME}:${DATABASE_PASSWORD}@localhost` thay vì `mongodb://admin:admin@localhost`
+![data](./data.png)
 
-## Joi
+* User đăng ký/ đăng nhập.
+* User tạo và quản lí các Flash card.
+* User tạo và quản lí các Collection, thêm Flash Card vào Collection.
+* Flash Card và Collection có thể có một hoặc nhiều Topic
 
-Joi là một thư viện validation dữ liệu trong Node.js với hơn 8 triệu lượt tải hàng tuần. Nó cho phép xác thực dữ liệu đầu vào và định dạng theo cách chúng ta muốn.
+## Tạo các entity
 
-* `Xác thực dữ liệu đầu vào`: Joi cung cấp một số phương thức để kiểm tra tính hợp lệ của dữ liệu đầu vào. Ví dụ, chúng ta có thể sử dụng phương thức string() và required() để kiểm tra xem giá trị đầu vào có tồn tại và phải là chuỗi hay không.
+5 module chính: User, User role, Topic, Flash card và Collection.
 
-* `Định dạng dữ liệu`: chúng ta cũng có thể sử dụng Joi để định dạng dữ liệu đầu vào theo một cách mà mình muốn. Ví dụ, sử dụng phương thức trim() để xóa khoảng trắng ở đầu và cuối chuỗi.
+### Relationship
 
-* `Tạo schema`: dự án này mình sẽ sử dụng Joi để tạo schema, đó là một đối tượng mô tả các thuộc tính và kiểu dữ liệu cho một đối tượng. Chúng ta sẽ tạo một schema để đảm bảo các biến môi trường có kiểu dữ liệu và định dạng đúng.
+1. One to one
+2. One to many
+3. Many to many
 
-* `Xử lý lỗi`: Nếu dữ liệu đầu vào không hợp lệ, Joi sẽ trả về một đối tượng lỗi chi tiết, cho biết vì sao dữ liệu không hợp lệ và ở đâu.
+### Mongoose Middleware
 
-Có thể sử dụng `class-validator` và `class-transformer` để validate các biến môi trường. Việc custom với dự án có nhiều biến môi trường sẽ mất thời gian, nên mình thích dùng Joi để nhanh gọn hơn.
+Một tính năng cũng khá hữu ích của Mongoose đó là Middleware ( hay còn gọi là pre và post hooks ).
 
-### Validate và Convert biến môi trường trong file env
+Middleware: `document middleware`, `model middleware`, `aggregate middleware`, và `query middleware`.
 
-Trên chúng ta validate để đảm bảo `NODE_ENV` phải thuộc vào các giá trị trong `valid` và bằng cách thêm vào `default` là `dev` giúp chúng ta chỉ định mặc định `NODE_ENV=dev`.
+### Virtual properties ( Optional )
 
-> Tuy nhiên việc chỉ định `default` ở đây khác với trong scripts của package.json chúng ta thêm ở trên `("start:dev": "NODE_ENV=development nest start --watch")`, ở envFilePath option lúc này ConfigModule vẫn còn đang trong quá trình khởi tạo nên không tồn tại giá trị `default` của Joi. Vì thế chúng ta nên thêm vào giá trị NODE_ENV trước các scripts để tránh các lỗi không mong muốn.
+Ví dụ trong trường hợp các bạn muốn user có cả thông tin first_name, last_name và full_name. Việc lưu first_name và last_name mà còn thêm full_name vào database sẽ gây ra dư thừa dữ liệu. Rất may là Mongoose có cung cấp cho chúng ta tính năng virtual properties.
 
-## Dockerizing
+## Repository Pattern Generic Service/Repository Pattern
 
-Trong quá trình dev đồng nhất môi trường code giữa các thành viên trong team là vô cùng quan trọng, tránh các lỗi phát sinh do môi trường không đồng nhất. Bên cạnh đó việc triển khai production cũng không kém phần quan trọng.
+Thông thường chúng ta học về Design Pattern đa phần là lý thuyết nên sẽ có phần khó hình dung và ghi nhớ. Vì thế trong phạm vi bài viết này mình muốn sử dụng Repository Pattern cho database layer kết hợp với Generic Pattern giúp tái sử dụng code để giúp các bạn phần nào hiểu được công dụng của nó trong dự án thực tế.
 
-* Đảm bảo sự đồng nhất giữa môi trường phát triển
-* Dễ dàng quản lý phát triển và triển khai ứng dụng
-* Đảm bảo tính cô lập giữa các ứng dụng
-* Giảm thiểu thời gian triển khai ứng dụng
-* Dễ dàng mở rộng và mở rộng ứng dụng
+1. Giúp tách biệt phần xử lý database khỏi phần xử lý logic của ứng dụng. Việc này làm cho code trở nên rõ ràng và dễ hiểu hơn, và cũng giúp cho việc maintain code trở nên dễ dàng hơn.
+2. Làm giảm sự phụ thuộc vào MongoDB hay bất kỳ hệ quản trị cơ sở dữ liệu nào khác. Chúng ta có thể thay đổi sang cái khác nếu thật sự cần
+3. Giảm độ phức tạp của các lớp service. Bằng cách sử dụng các phương thức được định nghĩa trong repository, các lớp service có thể tập trung vào việc thực hiện logic chức năng thay vì phải xử lý các câu truy vấn dữ liệu phức tạp.
+4. Cung cấp một cách thức để test database layer một cách độc lập. Chúng ta có thể tạo ra các đối tượng repository giả (mock repository) để test lớp service mà không cần kết nối đến cơ sở dữ liệu thật.
 
-1.**Dockerfile** để cấu hình cho container
+![repository](./repository.png)
 
-```bash
-docker build --target development -t flash_cards_api_dev .
-```
+* **Repository layer**: chịu trách nhiệm gọi đến database để lấy và xử lý data.
+* **Service layer**: nhận data từ controller và xử lý các logic mà không liên quan đến truy vấn database. Khi cần truy vấn database thì sẽ gọi đến để lấy dữ liệu từ repository layer.
 
-Notes:
+Sau khi đã chia layer với Repository Pattern chúng ta sẽ ứng dụng Generic Repository Pattern tạo BaseRepositoryInterface và BaseRepository với nhiệm vụ chứa các method căn bản dùng chung cho các module để tránh code bị lặp lại.
 
-* `--target`: Set the target build stage to build
-* `-t`: Name and optionally a tag
+BaseRepositoryInterface là interface mà chúng ta sẽ quy định các method mà một repository phải có. Chúng ta cần phải thiết kế các interface làm sao cho nội dung không thay đổi dù có thay đổi ORM hoặc hệ quản trị cơ sở dữ liệu.
 
-Sau khi có image tiến hành run thử
+BaseRepositoryAbstract là class implement các method từ BaseRepositoryInterface, logic query tùy theo loại database sẽ được triển khai ở đây. Sẽ bị thay đổi khi đổi ORM hoặc hệ quản trị cơ sở dữ liệu.
 
-```bash
-docker run -p 3000:3333 -v .:/app --name flash_cards_api_dev flash_cards_api_dev:latest
-```
-
-2.Docker Compose
-
-Docker Compose sẽ giúp chúng ta kết hợp các container để cài đặt cũng như triển khai dễ dàng hơn.
-
-Build: Đặt thư mục hiện tại làm ngữ cảnh build. Docker sẽ sử dụng nội dung của thư mục này để tạo image.`target:development`: Chỉ định giai đoạn build development trong Dockerfile multi-stage build.
-
-Network: Tạo một mạng mặc định sử dụng driver `bridge`. `bridge` là loại mạng mặc định trong Docker, cho phép các container trên cùng một mạng có thể giao tiếp với nhau.
-
-Lưu ý: các option như `env_file` và `environment` chỉ ghi đè lên các biến môi trường bên trong container chứ không tác động đến các biến trong file `docker-compose`. Mặc định Docker Compose sẽ tự động đọc file .env ở cùng cấp thư mục với file docker-compose đang được chạy, cho nên biến ${PORT} trên option ports sẽ lấy giá trị trong file .env
-
-Bổ sung: trong trường hợp nếu các bạn muốn chọn file env khác cho file docker-compose thay vì mặc định là file .env có thể dùng option --env-file khi run file docker-compose. `docker compose --env-file ./.env.dev -f docker-compose.dev.yml up`
-
-## Husky & Commitlint
-
-Husky và Commitlint là hai công cụ được sử dụng trong quá trình phát triển phần mềm, đặc biệt là trong các dự án sử dụng Git để quản lý phiên bản và phát triển phần mềm theo phương pháp Gitflow.
-
-```bash
-"prepare": "test -d node_modules/husky && husky install || echo \"husky is not installed\"",
-```
-
->`test -d node_modules/husky`dùng để kiểm tra husky có sẵn hay không trước khi install, tránh trường hợp khi sử dụng CI/CD bị gặp lỗi sh: husky: command not found
-
-Tiếp theo chúng ta sẽ cấu hình cho Commitlint, tạo file commitlint.config.js, chúng ta sẽ cấu hình chỉ cho phép team member tạo các commit message bắt đầu bằng một trong các từ trong enum ở dưới và thêm một số ràng buộc khác.
-
-Để sử dụng mình sẽ cho Husky dùng 2 hooks:
-
-* Pre-commit: dùng để kiểm tra code đã pass hết các rule của eslint chưa. `npx husky add .husky/pre-commit 'npm run lint'`
-* Commit-msg: sẽ dùng commitlint để check commit message căn cứ theo file cấu hình ở trên. `npx husky add .husky/commit-msg 'npx commitlint --edit $1'`
+T extends BaseEntity: chỉ định T sẽ bao gồm các field trong BaseEntity. Nếu không extends thì IDE sẽ báo lỗi Property deleted_at does not exist on... khi chúng ta gọi item.deleted_at bên trong các method của BaseRepositoryAbstract.

@@ -2,11 +2,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { LoggingInterceptor } from 'common/interceptors';
+import { LoggingInterceptor } from 'src/common/interceptors';
 import helmet from 'helmet';
-import { CustomValidationPipe, HttpExceptionFilter } from 'common';
+import { CustomValidationPipe, HttpExceptionFilter } from 'src/common';
 import { ConfigService } from '@nestjs/config';
-import { iDatabaseConfig } from 'configs/config/app.config';
+import { iDatabaseConfig } from '@configs/config/app.config';
 
 async function bootstrap() {
   const logger = new Logger(bootstrap.name);

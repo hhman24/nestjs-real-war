@@ -881,6 +881,11 @@
   resolved "https://registry.npmjs.org/@nestjs/mapped-types/-/mapped-types-2.0.5.tgz"
   integrity sha512-bSJv4pd6EY99NX9CjBIyn4TVDoSit82DUZlL4I3bqNfy5Gt+gXTa86i3I/i0iIV9P4hntcGM5GyO+FhZAhxtyg==
 
+"@nestjs/mongoose@^10.0.10":
+  version "10.0.10"
+  resolved "https://registry.yarnpkg.com/@nestjs/mongoose/-/mongoose-10.0.10.tgz#1206df06b6f744f62b0bd7502074c13f17177739"
+  integrity sha512-3Ff60ock8nwlAJC823TG91Qy+Qc6av+ddIb6n6wlFsTK0akDF/aTcagX8cF8uI8mWxCWjEwEsgv99vo6p0yJ+w==
+
 "@nestjs/platform-express@^10.0.0":
   version "10.3.10"
   resolved "https://registry.npmjs.org/@nestjs/platform-express/-/platform-express-10.3.10.tgz"
@@ -4254,7 +4259,7 @@ mongodb@6.7.0:
 
 mongoose@^8.5.2:
   version "8.5.2"
-  resolved "https://registry.npmjs.org/mongoose/-/mongoose-8.5.2.tgz"
+  resolved "https://registry.yarnpkg.com/mongoose/-/mongoose-8.5.2.tgz#73b40ce778f3fc66407aba3c3157795cdd278543"
   integrity sha512-GZB4rHMdYfGatV+23IpCrqFbyCOjCNOHXgWbirr92KRwTEncBrtW3kgU9vmpKjsGf7nMmnAy06SwWUv1vhDkSg==
   dependencies:
     bson "^6.7.0"
