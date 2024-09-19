@@ -1,51 +1,41 @@
-# Auth
+# Jest - unit test
 
-## JWT
+Về mặt tổng quan, Unit test là quá trình kiểm tra tính đúng đắn của một phần nhỏ nhất trong chương trình, ví dụ như một method hoặc một class, thông qua việc chạy các test case được viết sẵn.
 
-![jwt](./assets/jwt.png)
+## Test double
 
-Cấu trúc JWT:
+Test double là một kỹ thuật được sử dụng trong unit testing để tạo ra các đối tượng giả để đại diện cho các đối tượng thật trong hệ thống, nhằm kiểm tra việc tương tác giữa chúng và giúp cho việc test có thể được thực hiện dễ dàng hơn.
 
-* Header: chứa loại token (typ) và thuật toán (alg) dùng để mã hóa (HMAC SHA256 - HS256 hoặc RSA).
-* Payload: chứa các nội dung của thông tin (claims) và được chia làm 3 loại: reserved, public và private.
-* Signature: được tạo ra bằng cách kết hợp Header, Payload và Secret key. JWT sẽ căn cứ vào phần này để verify xem token có hợp lệ hay không.
+Tại sao phải sử dụng
 
-Cách JWT hoạt động: Quá trình xác thực tính hợp lệ trong JWT diễn ra như sau:
+* Đảm bảo tính cách biệt trong việc kiểm thử một thành phần riêng lẻ của hệ thống, giúp giảm thiểu các ảnh hưởng không mong muốn đến các thành phần khác.
 
-1. Đầu tiên sẽ tạo ra giá trị S1 = giá trị của Signature trong token.
-2. Package JWT sẽ sign thông tin trong Header và Payload kết hợp với Secret key để ra giá trị Signature S2.
-3. So sánh giữa S1 = S2, nếu bằng nhau thì token hợp lệ và ngược lại.
+* Tạo điều kiện cho việc tái sử dụng các phần kiểm thử, giảm thiểu thời gian và chi phí cho việc phát triển hệ thống.
 
-## Passportjs
+* Giúp tách biệt các thành phần của hệ thống để phát triển, test và triển khai một cách độc lập.
 
-Passport.js là một middleware xác thực user trong Node.js, cung cấp các chiến lược (strategy) xác thực khác nhau như OAuth, OpenID, Local Strategy, v.v. Việc sử dụng Passport.js giúp cho việc xác thực user trở nên dễ dàng và tiện lợi hơn nhờ vào các ưu điểm sau:
+Các thành phần của Test double bao gồm:
 
-* Đơn giản hóa quá trình xác thực người dùng: Passport.js cung cấp cho các chiến lược xác thực phổ biến. Điều này giúp đơn giản hóa quá trình xác thực người dùng và không phải viết code xác thực lại từ đầu.
+* `Stub`: giả lập các phản hồi của một đối tượng, cho phép kiểm tra các phần khác nhau của một method hoặc function.
+* `Mock object`: giả lập các phản hồi của một đối tượng và kiểm tra các phần khác nhau của method hoặc function.
+* `Fake object`: giả lập một đối tượng thực tế để kiểm tra các phần khác nhau của một method hoặc function.
+* `Spy`: theo dõi các hoạt động của một đối tượng trong quá trình thực thi.
+* `Dummy object`: một đối tượng giả lập đơn giản, thường được sử dụng để đưa dữ liệu vào method hoặc function.
 
-* Cải thiện tính bảo mật của ứng dụng: Passport.js được thiết kế để giảm thiểu các lỗ hổng bảo mật có thể xảy ra trong quá trình xác thực user. Nó sử dụng các chiến lược xác thực được chứng minh là an toàn và cung cấp các phương tiện để tùy chỉnh và cấu hình theo nhu cầu của ứng dụng.
+## AAA testing model
 
-* Hỗ trợ nhiều loại xác thực: Passport.js hỗ trợ nhiều loại xác thực khác nhau, bao gồm xác thực bằng local strategy, OAuth, OpenID, v.v. Điều này giúp cho ứng dụng của chúng ta trở nên linh hoạt và có thể tích hợp với nhiều dịch vụ xác thực khác nhau. Đó là những lý do tại sao mà theo mình chúng ta nên dùng Passport.js cho JWT. Trong dự án này quá trình xác thực của chúng ta sử dụng các strategy như sau:
+* `Arrange`: phần chuẩn bị dữ liệu, tạo các mock object, stub, fake object, ... để sẵn sàng cho việc test. Phần này nên được đặt ở đầu của test case.
+* `Act`: phần thực hiện hành động cần được test, ví dụ như gọi một phương thức hay thay đổi một giá trị biến. Phần này cần được đặt ngay sau phần chuẩn bị dữ liệu.
+* `Assert`: phần kiểm tra kết quả trả về từ phần Act, đảm bảo rằng hành động đã được thực hiện đúng và kết quả trả về đúng như mong đợi. Phần này nên được đặt cuối cùng của test case.
 
-* User gọi API đăng nhập để lấy access token. Passport-local sẽ thông qua auth service sẽ tiến hành validate thông tin đăng nhập và trả về token cho user.
+## Tạo instance
 
-* User gửi kèm access token khi gọi các API khác. Passport-jwt sẽ tiến hành validate access token và quyết định xem user có quyền truy cập hay không.
+Sau khi tạo được **instance** như trên thì chúng ta sẽ bắt đầu xét đến các quy tắc đầu tiên của unit test: **independent**. Có thể thấy ở trên nếu có nhiều test case thì toàn bộ chúng đều dùng chung một instance, dễ làm cho các test case bị ảnh hưởng lẫn nhau khi một trong số chúng tác động đến instance. Để tránh việc đó chúng ta dùng **beforeEach** để áp dụng việc tạo instance cho từng test case riêng, như tên của nó, callback sẽ được gọi lại với mỗi test case.
 
-* User gửi refresh token khi gọi API để renew access token mới. Passport-jwt sẽ tiến hành validate refresh token và quyết định xem token có hợp lệ để renew không.
+## Viết các mock test
 
-Nếu các bạn gặp lỗi "Unknown authentication strategy" thường là do 2 nguyên nhân:
+Để giải quyết các vấn đề liên quan đến model trong mongoose khi test chúng ta có thể sử dụng method getModelToken(model, connectionName) để mock model.
 
-* Strategy name ở guard và strategy không trùng khớp với nhau.
-* Quên không để strategy vào provider.
+## Mock các dependency service
 
-Verify access token
-![verify-token](./assets/jwt4.png)
-
-API Refresh token
-
-![refresh](./assets/jwt5.png)
-
-## Authorization
-
-Phân quyền cũng là một phần không thể thiếu trong dự án của chúng ta, mình sẽ lấy ví dụ ở module user khi muốn xóa user thì bắt buộc phải là Admin
-
-![authori](./assets/autho.png)
+Chúng ta đã hoàn thành việc tách biệt với database, tiếp theo chúng ta cần tách logic của các service từ npm như ConfigService và JwtService vì chúng ta không nên để test case phụ thuộc vào kết quả của các service khác. Để triển khai mình sẽ tạo ra các mock cho các method trong 2 service trên. Tạo folder mocks và tạo file `config-service.mock.ts`.
