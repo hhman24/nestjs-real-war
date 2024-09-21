@@ -1,41 +1,225 @@
-# Jest - unit test
+# S.O.L.I.D ✨️
 
-Về mặt tổng quan, Unit test là quá trình kiểm tra tính đúng đắn của một phần nhỏ nhất trong chương trình, ví dụ như một method hoặc một class, thông qua việc chạy các test case được viết sẵn.
+## Single Responsability Principle - SRP
 
-## Test double
+> Each class must have one, and only one, reason to change
 
-Test double là một kỹ thuật được sử dụng trong unit testing để tạo ra các đối tượng giả để đại diện cho các đối tượng thật trong hệ thống, nhằm kiểm tra việc tương tác giữa chúng và giúp cho việc test có thể được thực hiện dễ dàng hơn.
+![single responsibility](./assets/solid-1.png)
 
-Tại sao phải sử dụng
+```js
+class Topic {
+    createTopic(data: CreateTopicDto) {...}
+    updateTopic(id: string, data: UpdateTopicDto) {...}
+    deleteTopic(id: string) {...}
+    getAllTopics(filter: GetAllFilter) {...}
+    
+    sendNotificationToSubscribers(id: string, content: string) {...} // Vi phạm SRP
+    addNewSubscriber(id: string, user_id: string) {...} // Vi phạm SRP
+}
+```
 
-* Đảm bảo tính cách biệt trong việc kiểm thử một thành phần riêng lẻ của hệ thống, giúp giảm thiểu các ảnh hưởng không mong muốn đến các thành phần khác.
+Vi phạm nguyên tắc S vì nó đang làm các logic mặc dù vẫn nằm trong phạm vi Topic nhưng lại nằm ngoài trách nhiệm quản lý Topic của class.
 
-* Tạo điều kiện cho việc tái sử dụng các phần kiểm thử, giảm thiểu thời gian và chi phí cho việc phát triển hệ thống.
+Nhận ra một số vấn đề có thể xảy ra nếu chúng ta bỏ qua nguyên tắc **S**:
 
-* Giúp tách biệt các thành phần của hệ thống để phát triển, test và triển khai một cách độc lập.
+* Nếu viết toàn bộ chức năng liên quan vào một file thì số lượng dòng code trong file sẽ rất lớn.
+* Khi cần chỉnh sửa logic chúng ta phải mất thời gian tìm kiếm trong file cả ngàn dòng để chỉnh sửa.
+* Khó khăn trong việc tách các chức năng ra module riêng, ví dụ chúng ta muốn tách notification ra riêng để phục vụ cho các entity khác.
+* Khi một chức năng bị lỗi có thể ảnh hưởng đến các chức năng khác không liên quan trong class.
+* Làm cho việc viết test cũng trở nên phiền phức hơn. Thử nghĩ đến việc chúng ta phải mock hàng tá thứ cho một file test là đã thấy ngán rồi.
 
-Các thành phần của Test double bao gồm:
+Giải pháp 💡
 
-* `Stub`: giả lập các phản hồi của một đối tượng, cho phép kiểm tra các phần khác nhau của một method hoặc function.
-* `Mock object`: giả lập các phản hồi của một đối tượng và kiểm tra các phần khác nhau của method hoặc function.
-* `Fake object`: giả lập một đối tượng thực tế để kiểm tra các phần khác nhau của một method hoặc function.
-* `Spy`: theo dõi các hoạt động của một đối tượng trong quá trình thực thi.
-* `Dummy object`: một đối tượng giả lập đơn giản, thường được sử dụng để đưa dữ liệu vào method hoặc function.
+```js
+class Topic {
+    createTopic(data: CreateTopicDto) {...}
+    updateTopic(id: string, data: UpdateTopicDto) {...}
+    deleteTopic(id: string) {...}
+    getAllTopics(filter: GetAllFilter) {...}
+}
 
-## AAA testing model
+class Subscriber {
+    addNewSubscriber(id: string, user_id: string) {...}
+}
 
-* `Arrange`: phần chuẩn bị dữ liệu, tạo các mock object, stub, fake object, ... để sẵn sàng cho việc test. Phần này nên được đặt ở đầu của test case.
-* `Act`: phần thực hiện hành động cần được test, ví dụ như gọi một phương thức hay thay đổi một giá trị biến. Phần này cần được đặt ngay sau phần chuẩn bị dữ liệu.
-* `Assert`: phần kiểm tra kết quả trả về từ phần Act, đảm bảo rằng hành động đã được thực hiện đúng và kết quả trả về đúng như mong đợi. Phần này nên được đặt cuối cùng của test case.
+class Notifier {
+    sendNotificationToSubscribers(id: string, content: string) {...}
+}
+```
 
-## Tạo instance
+Sau khi refactor lại chúng ta có thể thấy mỗi class đã đảm nhiệm một logic riêng:
 
-Sau khi tạo được **instance** như trên thì chúng ta sẽ bắt đầu xét đến các quy tắc đầu tiên của unit test: **independent**. Có thể thấy ở trên nếu có nhiều test case thì toàn bộ chúng đều dùng chung một instance, dễ làm cho các test case bị ảnh hưởng lẫn nhau khi một trong số chúng tác động đến instance. Để tránh việc đó chúng ta dùng **beforeEach** để áp dụng việc tạo instance cho từng test case riêng, như tên của nó, callback sẽ được gọi lại với mỗi test case.
+* Topic: chịu trách nhiệm quản lí topic
+* Subscriber: chịu trách nhiệm quản lí các subscriber
+* Notifier: chịu trách nhiệm gửi thông báo
 
-## Viết các mock test
+Mục tiêu hướng tới 🌅
 
-Để giải quyết các vấn đề liên quan đến model trong mongoose khi test chúng ta có thể sử dụng method getModelToken(model, connectionName) để mock model.
+> Giúp tách biệt các behaviors với nhau, để khi có lỗi phát sinh trong quá trình chỉnh sửa 1 behavior sẽ không ảnh hưởng các behavior không liên quan
 
-## Mock các dependency service
+## O: Open/Closed Principle - OCP
 
-Chúng ta đã hoàn thành việc tách biệt với database, tiếp theo chúng ta cần tách logic của các service từ npm như ConfigService và JwtService vì chúng ta không nên để test case phụ thuộc vào kết quả của các service khác. Để triển khai mình sẽ tạo ra các mock cho các method trong 2 service trên. Tạo folder mocks và tạo file `config-service.mock.ts`.
+> Software entities (classes, modules, functions, and so on) should be open for extension but closed for modification
+
+![OCP](./assets/solid-2.png)
+
+Vấn đề ⚠️
+
+Chúng ta thường thấy nguyên lý này khi áp dụng các logic có nhiều điều kiện `if-else` hoặc `switch-case`.
+
+Thoạt nhìn thì đoạn code trên không có vấn đề gì, và nếu như trong suốt vòng đời của ứng dụng chúng ta không thay đổi hoặc bổ sung thêm phương thức thanh toán thì nó hoàn toàn ổn 👌. Tuy nhiên với trường hợp chúng ta cần bổ sung thêm hoặc xóa bớt phương thức thanh toán và việc đó diễn ra thường xuyên thì nó mới phát sinh vấn đề 💣️
+
+Mục tiêu hướng tới 🌅
+> Tránh được các lỗi phát sinh không mong muốn khi chúng ta chỉnh sửa code có sẵn.
+
+## L: Liskov Substitution Principle - LSP
+
+> Any instance of a subclass or derived class should be substitutable for an instance of its base class without affecting the correctness of the program.
+
+Biểu thị rằng các class con phải có khả năng thay thế được toàn bộ behavior của class mà nó kế thừa.
+
+![LSP](./assets/solid-3.png)
+
+```js
+export abstract class Vehicle {
+  isEngineRunning = false;
+  speed = 0;
+  turnOnEngine(): void {
+    this.isEngineRunning = true;
+  }
+  abstract accelerate(): void;
+}
+```
+
+```js
+export class Sedan extends Vehicle {
+  accelerate(): void {
+    this.speed += 80;
+  }
+}
+
+export class Bicycle extends Vehicle {
+  accelerate(): void {
+    this.speed += 5;
+  }
+  turnOnEngine(): void {
+    throw new Error("Bicycles don't have engines!");
+  }
+}
+
+function goTravelling(vehicle: Vehicle) {
+  vehicle.turnOnEngine();
+  vehicle.accelerate();
+  console.log(`Goingggg with speed ${vehicle.speed}`);
+}
+
+const sedan = new Sedan();
+goTravelling(sedan) // ✅️ Chạy bình thường
+
+const bicycle = new Bicycle();
+goTravelling(bicycle) // ❌️ Báo lỗi: Bicycles don't have engines!
+```
+
+Giải pháp
+
+```js
+abstract class Vehicle {
+  speed = 0;
+  abstract accelerate(): void;
+  // Loại bỏ method `turnOnEngine` khỏi class Vehicle
+}
+
+abstract class Car extends Vehicle{
+  isEngineRunning = false;
+}
+
+export class Sedan extends Car {
+  accelerate(): void {
+    this.speed += 40;
+  }
+  turnOnEngine(): void {
+    this.isEngineRunning = true;
+  }
+}
+
+export class Bicycle extends Vehicle {
+  accelerate(): void {
+    this.speed += 5;
+  }
+}
+```
+
+Mục tiêu hướng tới 🌅
+
+>Nguyên tắc này giúp đảm bảo tính nhất quán giữa class cha và các class kế thừa nó, đồng thời cũng giúp chúng ta có thể đoán trước được behavior của các class đó. Nếu chúng ta vi phạm nguyên tắc này có thể dẫn đến lỗi không mong muốn như ví dụ trên, quá trình maintain cũng trở nên khó khăn hơn.
+
+## I: Interface Segregation Principle - ISP
+
+> A class should not be forced to implement interfaces and methods that will not be used.
+
+Mục tiêu hướng tới 🌅 Nguyên tắc này giúp code chúng ta trở nên flexible và modularity hơn bằng cách tách các action ra thành những interface riêng biệt. Bên cạnh đó code cũng trở nên readable từ đó dễ maintain hơn.
+
+## D: Dependency Inversion Principle - DIP
+
+> High-level modules should not depend on low-level modules. Both should depend on the abstraction.
+
+![DIP](./assets/solid-4.png)
+
+```js
+interface Topic {
+  id: string;
+  name: string;
+  description: string;
+}
+
+class TopicRepository {
+  constructor() {}
+  create(topic: Topic) {}
+}
+
+class TopicService {
+  private topicRepository: TopicRepository;
+
+  constructor() {
+    this.topicRepository = new TopicRepository();
+  }
+
+  create(topic: Topic) {
+    this.topicRepository.create(topic);
+  }
+}
+```
+
+Rõ ràng từ ví dụ trên chúng ta thấy TopicService bị phụ thuộc và các method của TopicRepository, nếu chỉnh sửa tên method create thành save thì ngay lập tức TopicService sẽ bị lỗi. Bên cạnh đó việc test TopicService một cách độc lập cũng rất là khó do chúng ta phải tạo instance của TopicRepository và truyền vào TopicService 🤒.
+
+Giải pháp 💡
+
+```js
+...
+interface TopicRepositoryInterface {
+    create(topic: Topic): Topic {}
+}
+
+class TopicRepository implements TopicRepositoryInterface {
+  constructor() {}
+  create(topic: Topic): topic {}
+}
+
+class TopicService {
+  private topicRepository: TopicRepositoryInterface;
+
+  constructor(repository: TopicRepositoryInterface) {
+    this.topicRepository = repository
+  }
+
+  create(topic: Topic): Topic {
+    return this.topicRepository.create(topic);
+  }
+}
+```
+
+DI allows the creation of dependent objects outside of a class and provides those objects to another class that depends on it through injection at runtime rather than the dependent class creating it. The benefit of this is that it creates a more modular and maintainable code.
+
+IoC is a technique used for inverting the control flow of a program. Instead of the app controlling objects’ flow and creation, NestJS controls inversion. The NestJS IoC container manages the instantiation and injection of dependencies, where it creates a loosely coupled architecture by managing the dependencies between objects.
+
+Mục tiêu hướng tới 🌅 Nguyên tắc này giúp code chúng ta loose coupling từ đó giúp tăng tính modularity, dễ test, bảo trì và mở rộng.
